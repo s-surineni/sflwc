@@ -1,13 +1,31 @@
-import { LightningElement, api } from "lwc";
+import { LightningElement, api, wire } from "lwc";
 import { NavigationMixin } from 'lightning/navigation';
 import Id from '@salesforce/user/Id';
+import { getRecord } from 'lightning/uiRecordApi';
+import NAME_FIELD from '@salesforce/schema/User.Name';
+import EMAIL_FIELD from '@salesforce/schema/User.Email';
 
 export default class NavigateProducts extends NavigationMixin(LightningElement) {
     userId = Id;
     hey = "Hello";
-    @api invoke() {
-        console.log("userId" + this.userId);
+    @api recordId;
 
+    @wire(getRecord, {
+        recordId: '$recordId',
+        fields: [NAME_FIELD],
+        optionalFields: [EMAIL_FIELD]
+    })
+    record;
+
+
+    get recordStr() {
+        return this.record ? JSON.stringify(this.record.data, null, 2) : '';
+    }
+
+    @api invoke() {
+        console.log("userId " + this.userId);
+        console.log("recordId ", this.recordId);
+        console.log("record ", this.recordStr);
         this[NavigationMixin.Navigate]({
             type: 'standard__objectPage',
             attributes: {
@@ -15,6 +33,7 @@ export default class NavigateProducts extends NavigationMixin(LightningElement) 
                 actionName: 'home',
             },
         });
+
         // console.log("hey - " + this.hey);
         // console.log("hey " + this.hey);
         // console.log("userId");
